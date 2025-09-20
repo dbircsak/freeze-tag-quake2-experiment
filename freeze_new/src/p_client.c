@@ -1252,6 +1252,9 @@ void PutClientInServer (edict_t *ent)
 
 	gi.linkentity (ent);
 
+	// Give starting weapons and armor based on cvars
+	FT_PlayerWeapon(ent);
+
 	// force the current weapon up
 	client->newweapon = client->pers.weapon;
 	ChangeWeapon (ent);

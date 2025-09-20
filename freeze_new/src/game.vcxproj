@@ -80,6 +80,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="freeze.h" />
     <ClInclude Include="game.h" />
     <ClInclude Include="g_local.h" />
     <ClInclude Include="m_actor.h" />
@@ -108,6 +109,7 @@
     <ClInclude Include="q_shared.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="freeze.c" />
     <ClCompile Include="g_ai.c" />
     <ClCompile Include="g_chase.c" />
     <ClCompile Include="g_cmds.c" />

@@ -26,6 +26,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // because we define the full size ones in this file
 #define	GAME_INCLUDE
 #include "game.h"
+#include "freeze.h"
 
 // the "gameversion" client command will print this plus compile date
 #define	GAMEVERSION	"baseq2"

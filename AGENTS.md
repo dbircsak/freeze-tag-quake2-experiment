@@ -14,8 +14,15 @@ Quake 2 freeze tag game mode experiment - comprehensive modification of original
 - **Modified core files**: `g_local.h`, `g_cmds.c`, `g_combat.c`, `p_client.c`, `p_hud.c`, `g_main.c`
 - **Features added**: 4-team system, freeze/thaw mechanics, grappling hooks, map voting, ready system
 
+### Recent Implementations (freeze_new)
+- **Start weapon system**: Configurable starting weapons for newly spawned players
+  - Uses bitwise flags in `start_weapon` cvar (1=shotgun, 2=super shotgun, 4=machinegun, etc.)
+  - Automatic ammo allocation for granted weapons
+  - Default config: start_weapon 35 (shotgun + super shotgun + rocket launcher)
+  - Includes start_armor support via `start_armor` cvar
+
 ## Common Commands
-- Build: Open `freeze_orig/src/game.sln` in Visual Studio and build solution
+- Build: Open `freeze_orig/src/game.sln` or `freeze_new/src/game.sln` in Visual Studio and build solution
 - Clean: Use Visual Studio "Clean Solution" or delete build artifacts
 - Launch: Use `freeze.bat` or `freeze - dedicated server.bat`
 - Test: Run with custom maps that support freeze tag mechanics
