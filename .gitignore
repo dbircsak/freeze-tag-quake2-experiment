@@ -1,0 +1,6 @@
+﻿.vs
+gamex86
+gamex86.*
+*.user
+Debug
+Release
