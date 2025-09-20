@@ -96,15 +96,6 @@
     <ClInclude Include="freeze.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="gslog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="sl_packet.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="stdlog.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="q_shared.c">
@@ -252,15 +243,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="freeze.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="gslog.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="sl_packet.c">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="stdlog.c">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

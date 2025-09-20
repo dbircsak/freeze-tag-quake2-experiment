@@ -19,12 +19,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 #include "g_local.h"
 #include "m_player.h"
-/*freeze*/
-#include "stdlog.h"
-#include "gslog.h"
-
-#define	NAME_CLASH_STR	"<Name Clash>"
-/*freeze*/
 
 void ClientUserinfoChanged (edict_t *ent, char *userinfo);
 
@@ -532,9 +526,6 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 		LookAtKiller (self, inflictor, attacker);
 		self->client->ps.pmove.pm_type = PM_DEAD;
 		ClientObituary (self, inflictor, attacker);
-/*freeze*/
-		sl_WriteStdLogDeath(&gi, level, self, inflictor, attacker);
-/*freeze*/
 		TossClientWeapon (self);
 		if (deathmatch->value)
 			Cmd_Help_f (self);		// show scores
@@ -1351,9 +1342,6 @@ void ClientBeginDeathmatch (edict_t *ent)
 	}
 
 	gi.bprintf (PRINT_HIGH, "%s entered the game\n", ent->client->pers.netname);
-/*freeze*/
-	sl_WriteStdLogPlayerEntered(&gi, level, ent);
-/*freeze*/
 
 	// make sure all view stuff is valid
 	ClientEndServerFrame (ent);
@@ -1450,15 +1438,6 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo)
 
 	// set name
 	s = Info_ValueForKey (userinfo, "name");
-/*freeze*/
-	if (strlen(ent->client->pers.netname))
-	{
-		if (strcmp(ent->client->pers.netname, s))
-		{
-			sl_LogPlayerRename(&gi, ent->client->pers.netname, s, level.time);
-		}
-	}
-/*freeze*/
 	strncpy (ent->client->pers.netname, s, sizeof(ent->client->pers.netname)-1);
 
 	// set spectator
@@ -1620,9 +1599,6 @@ void ClientDisconnect (edict_t *ent)
 		return;
 
 	gi.bprintf (PRINT_HIGH, "%s disconnected\n", ent->client->pers.netname);
-/*freeze*/
-	sl_LogPlayerDisconnect(&gi, level, ent);
-/*freeze*/
 
 	// send effect
 	gi.WriteByte (svc_muzzleflash);

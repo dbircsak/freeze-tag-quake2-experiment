@@ -19,10 +19,6 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 #include "g_local.h"
-/*freeze*/
-#include "stdlog.h"
-#include "gslog.h"
-/*freeze*/
 
 typedef struct
 {
@@ -544,10 +540,6 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 
 	gi.FreeTags (TAG_LEVEL);
 
-/*freeze*/
-	if (fStarted)
-		sl_GameEnd(&gi, level);
-/*freeze*/
 	memset (&level, 0, sizeof(level));
 	memset (g_edicts, 0, game.maxentities * sizeof (g_edicts[0]));
 
@@ -628,18 +620,6 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 	G_FindTeams ();
 
 	PlayerTrail_Init ();
-/*freeze*/
-	sl_GameStart(&gi, level);
-	{
-		static cvar_t*	_log_style_cvar = NULL;
-
-		if (NULL == _log_style_cvar)
-			_log_style_cvar = gi.cvar("sl_log_style", "0", 0);
-
-		if (_log_style_cvar && _log_style_cvar->value >= SL_LOG_STYLE_1_2a)
-			fStarted = 1;
-	}
-/*freeze*/
 }
 
 

@@ -44,11 +44,11 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <OutDir>..</OutDir>
+    <OutDir>..\</OutDir>
     <TargetName>gamex86</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <OutDir>..</OutDir>
+    <OutDir>..\</OutDir>
     <TargetName>gamex86</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -82,7 +82,6 @@
   <ItemGroup>
     <ClInclude Include="freeze.h" />
     <ClInclude Include="game.h" />
-    <ClInclude Include="gslog.h" />
     <ClInclude Include="g_local.h" />
     <ClInclude Include="m_actor.h" />
     <ClInclude Include="m_berserk.h" />
@@ -108,12 +107,9 @@
     <ClInclude Include="m_supertank.h" />
     <ClInclude Include="m_tank.h" />
     <ClInclude Include="q_shared.h" />
-    <ClInclude Include="sl_packet.h" />
-    <ClInclude Include="stdlog.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="freeze.c" />
-    <ClCompile Include="gslog.c" />
     <ClCompile Include="g_ai.c" />
     <ClCompile Include="g_chase.c" />
     <ClCompile Include="g_cmds.c" />
@@ -162,8 +158,6 @@
     <ClCompile Include="p_view.c" />
     <ClCompile Include="p_weapon.c" />
     <ClCompile Include="q_shared.c" />
-    <ClCompile Include="sl_packet.c" />
-    <ClCompile Include="stdlog.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

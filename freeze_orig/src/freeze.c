@@ -1,7 +1,5 @@
 #include "g_local.h"
 #include "m_player.h"
-#include "stdlog.h"
-#include "gslog.h"
 
 #define	nteam	5
 #define	game_loop	for (i = 0; i < maxclients->value; i++)
@@ -209,11 +207,8 @@ void cmdChange(edict_t* ent)
 			gi.WriteByte(svc_stufftext);
 			gi.WriteString("alias +grow \"hook grow\"\nalias -grow \"hook stop\"\n");
 			gi.unicast(ent, true);
-			sl_LogPlayerName(&gi, ent->client->pers.netname, freeze_team[team], level.time);
 			ent->client->pers.spectator = false;
 		}
-		else
-			sl_LogPlayerTeamChange(&gi, ent->client->pers.netname, freeze_team[team], level.time);
 		gi.WriteByte(svc_stufftext);
 		gi.WriteString("spectator 0\n");
 		gi.unicast(ent, true);
@@ -234,7 +229,6 @@ void cmdChange(edict_t* ent)
 		meansOfDeath = MOD_SUICIDE;
 		player_die(ent, ent, ent, 100000, vec3_origin);
 		gi.bprintf(PRINT_HIGH, "%s changed to the %s team.\n", ent->client->pers.netname, freeze_team[team]);
-		sl_LogPlayerTeamChange(&gi, ent->client->pers.netname, freeze_team[team], level.time);
 	}
 }
 
@@ -556,7 +550,6 @@ static void playerUnfreeze(edict_t* ent)
 		{
 			ent->client->resp.thawer->client->resp.score++;
 			ent->client->resp.thawer->client->resp.thawed++;
-			sl_LogScore(&gi, ent->client->resp.thawer->client->pers.netname, NULL, "Thaw", NULL, 1, level.time, ent->client->resp.thawer->client->ping);
 			freeze[ent->client->resp.team].thawed++;
 			if (rand() &1)
 				gi.bprintf(PRINT_HIGH, "%s thaws %s like a package of frozen peas.\n", ent->client->resp.thawer->client->pers.netname, ent->client->pers.netname);
