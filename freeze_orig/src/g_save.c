@@ -19,6 +19,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 #include "g_local.h"
+/*freeze*/
+#include "stdlog.h"
+#include "gslog.h"
+/*freeze*/
 
 #define Function(f) {#f, f}
 
@@ -151,6 +155,9 @@ is loaded.
 */
 void InitGame (void)
 {
+/*freeze*/
+	sl_Logging(&gi, "Freeze Tag");
+/*freeze*/
 	gi.dprintf ("==== InitGame ====\n");
 
 	gun_x = gi.cvar ("gun_x", "0", 0);
@@ -203,6 +210,9 @@ void InitGame (void)
 	// dm map list
 	sv_maplist = gi.cvar ("sv_maplist", "", 0);
 
+/*freeze*/
+	cvarFreeze();
+/*freeze*/
 	// items
 	InitItems ();
 

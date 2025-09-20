@@ -19,6 +19,12 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 #include "g_local.h"
 #include "m_player.h"
+/*freeze*/
+#include "stdlog.h"
+#include "gslog.h"
+
+#define	NAME_CLASH_STR	"<Name Clash>"
+/*freeze*/
 
 void ClientUserinfoChanged (edict_t *ent, char *userinfo);
 
@@ -526,6 +532,9 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 		LookAtKiller (self, inflictor, attacker);
 		self->client->ps.pmove.pm_type = PM_DEAD;
 		ClientObituary (self, inflictor, attacker);
+/*freeze*/
+		sl_WriteStdLogDeath(&gi, level, self, inflictor, attacker);
+/*freeze*/
 		TossClientWeapon (self);
 		if (deathmatch->value)
 			Cmd_Help_f (self);		// show scores
@@ -538,6 +547,9 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 				self->client->resp.coop_respawn.inventory[n] = self->client->pers.inventory[n];
 			self->client->pers.inventory[n] = 0;
 		}
+/*freeze*/
+		freeze[self->client->resp.team].update = true;
+/*freeze*/
 	}
 
 	// remove powerups
@@ -547,8 +559,25 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 	self->client->enviro_framenum = 0;
 	self->flags &= ~FL_POWER_ARMOR;
 
+/*freeze*/
+	if (freezeCheck(self))
+	{
+		freezeAnim(self);
+		return;
+	}
+/*freeze*/
 	if (self->health < -40)
 	{	// gib
+/*freeze*/
+		if (self->client->frozen)
+		{
+			if (meansOfDeath == MOD_FALLING && damage < 250)
+				return;
+			self->client->frozen_time = level.time + 1;
+			self->takedamage = DAMAGE_NO;
+			return;
+		}
+/*freeze*/
 		gi.sound (self, CHAN_BODY, gi.soundindex ("misc/udeath.wav"), 1, ATTN_NORM, 0);
 		for (n= 0; n < 4; n++)
 			ThrowGib (self, "models/objects/gibs/sm_meat/tris.md2", damage, GIB_ORGANIC);
@@ -632,9 +661,20 @@ void InitClientPersistant (gclient_t *client)
 
 void InitClientResp (gclient_t *client)
 {
+/*freeze*/
+	int	team = client->resp.team;
+	qboolean	old_hook = client->resp.old_hook;
+	int	help = client->resp.help;
+/*freeze*/
 	memset (&client->resp, 0, sizeof(client->resp));
 	client->resp.enterframe = level.framenum;
 	client->resp.coop_respawn = client->pers;
+/*freeze*/
+	client->resp.team = team;
+	client->resp.old_hook = old_hook;
+	client->resp.help = help;
+	client->resp.vote = -1;
+/*freeze*/
 }
 
 /*
@@ -1027,6 +1067,16 @@ void spectator_respawn (edict_t *ent)
 			return;
 		}
 
+/*freeze*/
+		if (ent->client->frozen)
+		{
+			ent->client->pers.spectator = false;
+			gi.WriteByte(svc_stufftext);
+			gi.WriteString("spectator 0\n");
+			gi.unicast(ent, true);
+			return;
+		}
+/*freeze*/
 		// count spectators
 		for (i = 1, numspec = 0; i <= maxclients->value; i++)
 			if (g_edicts[i].inuse && g_edicts[i].client->pers.spectator)
@@ -1080,7 +1130,11 @@ void spectator_respawn (edict_t *ent)
 	if (ent->client->pers.spectator) 
 		gi.bprintf (PRINT_HIGH, "%s has moved to the sidelines\n", ent->client->pers.netname);
 	else
+/*freeze
 		gi.bprintf (PRINT_HIGH, "%s joined the game\n", ent->client->pers.netname);
+freeze*/
+		gi.bprintf(PRINT_HIGH, "%s joined the %s team\n", ent->client->pers.netname, freeze_team[ent->client->resp.team]);
+/*freeze*/
 }
 
 //==============================================================
@@ -1242,6 +1296,10 @@ void PutClientInServer (edict_t *ent)
 		ent->svflags |= SVF_NOCLIENT;
 		ent->client->ps.gunindex = 0;
 		gi.linkentity (ent);
+/*freeze*/
+		if (client->resp.team == none)
+			pmenuBegin(ent);
+/*freeze*/
 		return;
 	} else
 		client->resp.spectator = false;
@@ -1253,8 +1311,13 @@ void PutClientInServer (edict_t *ent)
 	gi.linkentity (ent);
 
 	// force the current weapon up
+/*freeze
 	client->newweapon = client->pers.weapon;
 	ChangeWeapon (ent);
+freeze*/
+	playerWeapon(ent);
+	freeze[ent->client->resp.team].update = true;
+/*freeze*/
 }
 
 /*
@@ -1288,6 +1351,9 @@ void ClientBeginDeathmatch (edict_t *ent)
 	}
 
 	gi.bprintf (PRINT_HIGH, "%s entered the game\n", ent->client->pers.netname);
+/*freeze*/
+	sl_WriteStdLogPlayerEntered(&gi, level, ent);
+/*freeze*/
 
 	// make sure all view stuff is valid
 	ClientEndServerFrame (ent);
@@ -1372,6 +1438,9 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo)
 {
 	char	*s;
 	int		playernum;
+/*freeze*/
+	int	fIgnoreName = 0;
+/*freeze*/
 
 	// check for malformed or illegal info strings
 	if (!Info_Validate(userinfo))
@@ -1381,10 +1450,23 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo)
 
 	// set name
 	s = Info_ValueForKey (userinfo, "name");
+/*freeze*/
+	if (strlen(ent->client->pers.netname))
+	{
+		if (strcmp(ent->client->pers.netname, s))
+		{
+			sl_LogPlayerRename(&gi, ent->client->pers.netname, s, level.time);
+		}
+	}
+/*freeze*/
 	strncpy (ent->client->pers.netname, s, sizeof(ent->client->pers.netname)-1);
 
 	// set spectator
 	s = Info_ValueForKey (userinfo, "spectator");
+/*freeze*/
+	if (ent->client->resp.team == none)
+		strcpy(s, "1");
+/*freeze*/
 	// spectators are only supported in deathmatch
 	if (deathmatch->value && *s && strcmp(s, "0"))
 		ent->client->pers.spectator = true;
@@ -1397,7 +1479,11 @@ void ClientUserinfoChanged (edict_t *ent, char *userinfo)
 	playernum = ent-g_edicts-1;
 
 	// combine name and skin into a configstring
+/*freeze*/
+	freezeSkin(ent, s);
+/*freeze
 	gi.configstring (CS_PLAYERSKINS+playernum, va("%s\\%s", ent->client->pers.netname, s) );
+freeze*/
 
 	// fov
 	if (deathmatch->value && ((int)dmflags->value & DF_FIXED_FOV))
@@ -1450,6 +1536,9 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 
 	// check for a spectator
 	value = Info_ValueForKey (userinfo, "spectator");
+/*freeze*/
+	strcpy(value, "1");
+/*freeze*/
 	if (deathmatch->value && *value && strcmp(value, "0")) {
 		int i, numspec;
 
@@ -1470,6 +1559,10 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 			return false;
 		}
 	} else {
+/*freeze*/
+	}
+	{
+/*freeze*/
 		// check for a password
 		value = Info_ValueForKey (userinfo, "password");
 		if (*password->string && strcmp(password->string, "none") && 
@@ -1488,6 +1581,14 @@ qboolean ClientConnect (edict_t *ent, char *userinfo)
 	if (ent->inuse == false)
 	{
 		// clear the respawning variables
+/*freeze*/
+		ent->client->resp.team = none;
+		ent->client->resp.thawer = NULL;
+		ent->client->resp.old_hook = false;
+		ent->client->resp.help = 0;
+		ent->client->resp.vote = -1;
+		ent->client->resp.thawed = 0;
+/*freeze*/
 		InitClientResp (ent->client);
 		if (!game.autosaved || !ent->client->pers.weapon)
 			InitClientPersistant (ent->client);
@@ -1519,6 +1620,9 @@ void ClientDisconnect (edict_t *ent)
 		return;
 
 	gi.bprintf (PRINT_HIGH, "%s disconnected\n", ent->client->pers.netname);
+/*freeze*/
+	sl_LogPlayerDisconnect(&gi, level, ent);
+/*freeze*/
 
 	// send effect
 	gi.WriteByte (svc_muzzleflash);
@@ -1535,6 +1639,9 @@ void ClientDisconnect (edict_t *ent)
 
 	playernum = ent-g_edicts-1;
 	gi.configstring (CS_PLAYERSKINS+playernum, "");
+/*freeze*/
+	freeze[ent->client->resp.team].update = true;
+/*freeze*/
 }
 
 
@@ -1599,7 +1706,12 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 	pm_passent = ent;
 
+/*freeze
 	if (ent->client->chase_target) {
+freeze*/
+	if (ent->client->chase_target && !ent->client->frozen)
+	{
+/*freeze*/
 
 		client->resp.cmd_angles[0] = SHORT2ANGLE(ucmd->angles[0]);
 		client->resp.cmd_angles[1] = SHORT2ANGLE(ucmd->angles[1]);
@@ -1672,7 +1784,11 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		if (pm.groundentity)
 			ent->groundentity_linkcount = pm.groundentity->linkcount;
 
+/*freeze*/
+		if (ent->deadflag && !ent->client->frozen)
+/*freeze
 		if (ent->deadflag)
+freeze*/
 		{
 			client->ps.viewangles[ROLL] = 40;
 			client->ps.viewangles[PITCH] = -15;
@@ -1688,6 +1804,10 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 		if (ent->movetype != MOVETYPE_NOCLIP)
 			G_TouchTriggers (ent);
+/*freeze*/
+		if (ent->client->frozen)
+			G_TouchTriggers(ent);
+/*freeze*/
 
 		// touch other objects
 		for (i=0 ; i<pm.numtouch ; i++)
@@ -1732,6 +1852,10 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		}
 	}
 
+/*freeze*/
+	if (ucmd->upmove >= 10 && ent->health > 0)
+		client->buttons |= 4;
+/*freeze
 	if (client->resp.spectator) {
 		if (ucmd->upmove >= 10) {
 			if (!(client->ps.pmove.pm_flags & PMF_JUMP_HELD)) {
@@ -1744,6 +1868,7 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 		} else
 			client->ps.pmove.pm_flags &= ~PMF_JUMP_HELD;
 	}
+freeze*/
 
 	// update chase cam if being followed
 	for (i = 1; i <= maxclients->value; i++) {
@@ -1772,6 +1897,9 @@ void ClientBeginServerFrame (edict_t *ent)
 
 	client = ent->client;
 
+/*freeze*/
+	freezeMain(ent);
+/*freeze*/
 	if (deathmatch->value &&
 		client->pers.spectator != client->resp.spectator &&
 		(level.time - client->respawn_time) >= 5) {
@@ -1799,6 +1927,14 @@ void ClientBeginServerFrame (edict_t *ent)
 			if ( ( client->latched_buttons & buttonMask ) ||
 				(deathmatch->value && ((int)dmflags->value & DF_FORCE_RESPAWN) ) )
 			{
+/*freeze*/
+				if (client->frozen)
+				{
+					if (client->latched_buttons &buttonMask)
+						cmdMoan(ent);
+				}
+				else
+/*freeze*/
 				respawn(ent);
 				client->latched_buttons = 0;
 			}

@@ -140,6 +140,10 @@ void ThrowGib (edict_t *self, char *gibname, int damage, int type)
 	vec3_t	size;
 	float	vscale;
 
+/*freeze*/
+	if (gibCheck())
+		return;
+/*freeze*/
 	gib = G_Spawn();
 
 	VectorScale (self->size, 0.5, size);
@@ -174,7 +178,18 @@ void ThrowGib (edict_t *self, char *gibname, int damage, int type)
 	gib->avelocity[1] = random()*600;
 	gib->avelocity[2] = random()*600;
 
+/*freeze*/
+	if (self->inuse && self->client && self->client->frozen)
+	{
+		playerShell(gib, self->client->resp.team);
+		if (random() > 0.2)
+			gib->s.effects &= ~EF_GIB;
+	}
+
+	gib->think = gibThink;
+/*freeze
 	gib->think = G_FreeEdict;
+freeze*/
 	gib->nextthink = level.time + 10 + random()*10;
 
 	gi.linkentity (gib);
@@ -250,7 +265,11 @@ void ThrowClientHead (edict_t *self, int damage)
 
 	self->takedamage = DAMAGE_NO;
 	self->solid = SOLID_NOT;
+/*freeze*/
+	self->s.effects |= EF_GIB;
+/*freeze
 	self->s.effects = EF_GIB;
+freeze*/
 	self->s.sound = 0;
 	self->flags |= FL_NO_KNOCKBACK;
 

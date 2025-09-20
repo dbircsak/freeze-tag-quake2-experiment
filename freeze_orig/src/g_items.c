@@ -506,7 +506,11 @@ qboolean Pickup_Ammo (edict_t *ent, edict_t *other)
 	}
 
 	if (!(ent->spawnflags & (DROPPED_ITEM | DROPPED_PLAYER_ITEM)) && (deathmatch->value))
+/*freeze
 		SetRespawn (ent, 30);
+freeze*/
+		freezeRespawn(ent, 30);
+/*freeze*/
 	return true;
 }
 
@@ -1106,6 +1110,13 @@ void SpawnItem (edict_t *ent, gitem_t *item)
 				return;
 			}
 		}
+/*freeze*/
+		if (/*strcmp(ent->classname, "weapon_bfg") == 0 || */strcmp(ent->classname, "item_power_screen") == 0 || strcmp(ent->classname, "item_power_shield") == 0)
+		{
+			G_FreeEdict(ent);
+			return;
+		}
+/*freeze*/
 	}
 
 	if (coop->value && (strcmp(ent->classname, "key_power_cube") == 0))

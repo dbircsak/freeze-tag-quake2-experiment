@@ -737,6 +737,10 @@ void bfg_explode (edict_t *self)
 				continue;
 			if (ent == self->owner)
 				continue;
+/*freeze*/
+			if (ent->client && ent->client->frozen)
+				continue;
+/*freeze*/
 			if (!CanDamage (ent, self))
 				continue;
 			if (!CanDamage (ent, self->owner))
@@ -827,6 +831,10 @@ void bfg_think (edict_t *self)
 
 		if (ent == self->owner)
 			continue;
+/*freeze*/
+			if (ent->client && ent->client->frozen)
+				continue;
+/*freeze*/
 
 		if (!ent->takedamage)
 			continue;

@@ -19,6 +19,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 #include "g_local.h"
+/*freeze*/
+#include "stdlog.h"
+#include "gslog.h"
+/*freeze*/
 
 typedef struct
 {
@@ -524,6 +528,9 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 	char		*com_token;
 	int			i;
 	float		skill_level;
+/*freeze*/
+	static int	fStarted = 0;
+/*freeze*/
 
 	skill_level = floor (skill->value);
 	if (skill_level < 0)
@@ -537,6 +544,10 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 
 	gi.FreeTags (TAG_LEVEL);
 
+/*freeze*/
+	if (fStarted)
+		sl_GameEnd(&gi, level);
+/*freeze*/
 	memset (&level, 0, sizeof(level));
 	memset (g_edicts, 0, game.maxentities * sizeof (g_edicts[0]));
 
@@ -617,6 +628,18 @@ void SpawnEntities (char *mapname, char *entities, char *spawnpoint)
 	G_FindTeams ();
 
 	PlayerTrail_Init ();
+/*freeze*/
+	sl_GameStart(&gi, level);
+	{
+		static cvar_t*	_log_style_cvar = NULL;
+
+		if (NULL == _log_style_cvar)
+			_log_style_cvar = gi.cvar("sl_log_style", "0", 0);
+
+		if (_log_style_cvar && _log_style_cvar->value >= SL_LOG_STYLE_1_2a)
+			fStarted = 1;
+	}
+/*freeze*/
 }
 
 
@@ -780,6 +803,52 @@ char *dm_statusbar =
   "xv 64 "
   "stat_string 16 "
 "endif "
+/*freeze*/
+"if 18 "
+	"xv 0 "
+	"yb -76 "
+	"string \"Viewing\" "
+	"xv 64 "
+	"stat_string 18 "
+"endif "
+
+"xr -88 "
+
+"yb -92 "
+"string2 \"    Sco/Ali\" "
+
+"yb -84 "
+"if 19 "
+	"stat_string 19 "
+"endif "
+"if 23 "
+	"stat_string 23 "
+"endif "
+
+"yb -76 "
+"if 20 "
+	"stat_string 20 "
+"endif "
+"if 24 "
+	"stat_string 24 "
+"endif "
+
+"yb -68 "
+"if 21 "
+	"stat_string 21 "
+"endif "
+"if 25 "
+	"stat_string 25 "
+"endif "
+
+"yb -60 "
+"if 22 "
+	"stat_string 22 "
+"endif "
+"if 26 "
+	"stat_string 26 "
+"endif "
+/*freeze*/
 ;
 
 
@@ -941,7 +1010,11 @@ void SP_worldspawn (edict_t *ent)
 //
 
 	// 0 normal
+/*freeze*/
+	freezeSpawn();
+/*freeze
 	gi.configstring(CS_LIGHTS+0, "m");
+freeze*/
 	
 	// 1 FLICKER (first variety)
 	gi.configstring(CS_LIGHTS+1, "mmnmmommommnonmmonqnmmo");

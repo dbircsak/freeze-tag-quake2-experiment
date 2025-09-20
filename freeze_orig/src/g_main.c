@@ -19,6 +19,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 #include "g_local.h"
+/*freeze*/
+#include "stdlog.h"
+#include "gslog.h"
+/*freeze*/
 
 game_locals_t	game;
 level_locals_t	level;
@@ -94,6 +98,9 @@ void G_RunFrame (void);
 void ShutdownGame (void)
 {
 	gi.dprintf ("==== ShutdownGame ====\n");
+/*freeze*/
+	sl_GameEnd(&gi, level);
+/*freeze*/
 
 	gi.FreeTags (TAG_LEVEL);
 	gi.FreeTags (TAG_GAME);
@@ -229,6 +236,13 @@ void EndDMLevel (void)
 		return;
 	}
 
+/*freeze*/
+	if (freezeMap())
+	{
+		BeginIntermission(CreateTargetChangeLevel(maplist[endMapIndex].name));
+		return;
+	}
+/*freeze*/
 	// see if it's in the map list
 	if (*sv_maplist->string) {
 		s = _strdup(sv_maplist->string);
@@ -312,6 +326,16 @@ void CheckDMRules (void)
 	if (!deathmatch->value)
 		return;
 
+/*freeze*/
+	for (i = red; i < none; i++)
+		if (freeze[i].break_time > level.time)
+			return;
+	if (endCheck())
+	{
+		EndDMLevel();
+		return;
+	}
+/*freeze*/
 	if (timelimit->value)
 	{
 		if (level.time >= timelimit->value*60)

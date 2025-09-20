@@ -397,7 +397,11 @@ void trigger_push_touch (edict_t *self, edict_t *other, cplane_t *plane, csurfac
 	{
 		VectorScale (self->movedir, self->speed * 10, other->velocity);
 	}
+/*freeze*/
+	else if (other->health > 0 || (other->client && other->client->frozen))
+/*freeze
 	else if (other->health > 0)
+freeze*/
 	{
 		VectorScale (self->movedir, self->speed * 10, other->velocity);
 

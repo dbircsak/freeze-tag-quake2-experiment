@@ -26,6 +26,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 // because we define the full size ones in this file
 #define	GAME_INCLUDE
 #include "game.h"
+/*freeze*/
+#include "freeze.h"
+/*freeze*/
 
 // the "gameversion" client command will print this plus compile date
 #define	GAMEVERSION	"baseq2"
@@ -874,6 +877,14 @@ typedef struct
 	vec3_t		cmd_angles;			// angles sent over in the last command
 
 	qboolean	spectator;			// client is a spectator
+/*freeze*/
+	int	team;
+	edict_t*	thawer;
+	qboolean	old_hook;
+	int	help;
+	int	vote;
+	int	thawed;
+/*freeze*/
 } client_respawn_t;
 
 // this structure is cleared on each PutClientInServer(),
@@ -960,6 +971,17 @@ struct gclient_s
 
 	edict_t		*chase_target;		// player we are chasing
 	qboolean	update_chase;		// need to update chase info?
+/*freeze*/
+	qboolean	frozen;
+	edict_t*	viewed;
+	float	thaw_time;
+	float	frozen_time;
+	int	hookstate;
+	qboolean	flashlight;
+	hndnode*	menu;
+	int	hooker;
+	float	moan_time;
+/*freeze*/
 };
 
 

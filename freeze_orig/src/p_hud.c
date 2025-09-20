@@ -78,9 +78,13 @@ void BeginIntermission (edict_t *targ)
 	if (level.intermissiontime)
 		return;		// already activated
 
+/*freeze*/
+	freezeIntermission();
+/*freeze*/
 	game.autosaved = false;
 
 	// respawn any dead clients
+/*freeze
 	for (i=0 ; i<maxclients->value ; i++)
 	{
 		client = g_edicts + 1 + i;
@@ -89,6 +93,7 @@ void BeginIntermission (edict_t *targ)
 		if (client->health <= 0)
 			respawn(client);
 	}
+freeze*/
 
 	level.intermissiontime = level.time;
 	level.changemap = targ->map;
@@ -176,6 +181,10 @@ void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 	edict_t		*cl_ent;
 	char	*tag;
 
+/*freeze*/
+	freezeScore(ent, killer);
+	return;
+/*freeze*/
 	// sort the clients by score
 	total = 0;
 	for (i=0 ; i<game.maxclients ; i++)
@@ -277,6 +286,9 @@ void Cmd_Score_f (edict_t *ent)
 {
 	ent->client->showinventory = false;
 	ent->client->showhelp = false;
+/*freeze*/
+	pmenu_close(ent);
+/*freeze*/
 
 	if (!deathmatch->value && !coop->value)
 		return;
@@ -520,6 +532,9 @@ void G_SetStats (edict_t *ent)
 		ent->client->ps.stats[STAT_HELPICON] = 0;
 
 	ent->client->ps.stats[STAT_SPECTATOR] = 0;
+/*freeze*/
+	playerStat(ent);
+/*freeze*/
 }
 
 /*
@@ -553,6 +568,9 @@ void G_SetSpectatorStats (edict_t *ent)
 	if (!cl->chase_target)
 		G_SetStats (ent);
 
+/*freeze*/
+	if (cl->resp.spectator)
+/*freeze*/
 	cl->ps.stats[STAT_SPECTATOR] = 1;
 
 	// layouts are independant in spectator

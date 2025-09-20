@@ -71,6 +71,18 @@ void SelectNextItem (edict_t *ent, int itflags)
 
 	cl = ent->client;
 
+/*freeze*/
+	if (cl->menu)
+	{
+		pmenu_next(ent);
+		return;
+	}
+	if (cl->frozen)
+	{
+		ChaseNext(ent);
+		return;
+	}
+/*freeze*/
 	if (cl->chase_target) {
 		ChaseNext(ent);
 		return;
@@ -103,6 +115,18 @@ void SelectPrevItem (edict_t *ent, int itflags)
 
 	cl = ent->client;
 
+/*freeze*/
+	if (cl->menu)
+	{
+		pmenu_prev(ent);
+		return;
+	}
+	if (cl->frozen)
+	{
+		ChasePrev(ent);
+		return;
+	}
+/*freeze*/
 	if (cl->chase_target) {
 		ChasePrev(ent);
 		return;
@@ -473,6 +497,13 @@ void Cmd_Inven_f (edict_t *ent)
 	cl->showscores = false;
 	cl->showhelp = false;
 
+/*freeze*/
+	if (cl->menu)
+		pmenu_close(ent);
+	else
+		pmenuBegin(ent);
+	return;
+/*freeze*/
 	if (cl->showinventory)
 	{
 		cl->showinventory = false;
@@ -498,6 +529,13 @@ void Cmd_InvUse_f (edict_t *ent)
 {
 	gitem_t		*it;
 
+/*freeze*/
+	if (ent->client->menu)
+	{
+		pmenu_select(ent);
+		return;
+	}
+/*freeze*/
 	ValidateSelectedItem (ent);
 
 	if (ent->client->pers.selected_item == -1)
@@ -625,7 +663,11 @@ void Cmd_InvDrop_f (edict_t *ent)
 
 	ValidateSelectedItem (ent);
 
+/*freeze
 	if (ent->client->pers.selected_item == -1)
+freeze*/
+	if (ent->client->pers.selected_item == -1 || ent->health <= 0)
+/*freeze*/
 	{
 		gi.cprintf (ent, PRINT_HIGH, "No item to drop.\n");
 		return;
@@ -649,6 +691,10 @@ void Cmd_Kill_f (edict_t *ent)
 {
 	if((level.time - ent->client->respawn_time) < 5)
 		return;
+/*freeze*/
+	if (ent->health <= 0 || ent->client->resp.spectator)
+		return;
+/*freeze*/
 	ent->flags &= ~FL_GODMODE;
 	ent->health = 0;
 	meansOfDeath = MOD_SUICIDE;
@@ -665,6 +711,10 @@ void Cmd_PutAway_f (edict_t *ent)
 	ent->client->showscores = false;
 	ent->client->showhelp = false;
 	ent->client->showinventory = false;
+/*freeze*/
+	if (ent->client->menu)
+		pmenu_close(ent);
+/*freeze*/
 }
 
 
@@ -801,7 +851,11 @@ void Cmd_Say_f (edict_t *ent, qboolean team, qboolean arg0)
 	if (team)
 		Com_sprintf (text, sizeof(text), "(%s): ", ent->client->pers.netname);
 	else
+/*freeze
 		Com_sprintf (text, sizeof(text), "%s: ", ent->client->pers.netname);
+freeze*/
+		Com_sprintf (text, sizeof(text), "%s %s: ", ent->client->resp.spectator ? freeze_team[none] : freeze_team[ent->client->resp.team], ent->client->pers.netname);
+/*freeze*/
 
 	if (arg0)
 	{
@@ -926,7 +980,11 @@ void ClientCommand (edict_t *ent)
 	}
 	if (Q_stricmp (cmd, "say_team") == 0)
 	{
+/*freeze
 		Cmd_Say_f (ent, true, false);
+freeze*/
+		sayTeam(ent);
+/*freeze*/
 		return;
 	}
 	if (Q_stricmp (cmd, "score") == 0)
@@ -987,6 +1045,22 @@ void ClientCommand (edict_t *ent)
 		Cmd_Wave_f (ent);
 	else if (Q_stricmp(cmd, "playerlist") == 0)
 		Cmd_PlayerList_f(ent);
+/*freeze*/
+	else if (Q_stricmp(cmd, "hook") == 0)
+		cmdHook(ent);
+	else if (Q_stricmp(cmd, "flashlight") == 0)
+		cmdFlashlight(ent);
+	else if (Q_stricmp(cmd, "team") == 0)
+		cmdChange(ent);
+	else if (Q_stricmp(cmd, "pv") == 0 || Q_stricmp(cmd, "play_team") == 0)
+		cmdPlay(ent);
+	else if (Q_stricmp(cmd, "menu") == 0)
+		Cmd_Inven_f(ent);
+	else if (Q_stricmp(cmd, "vote") == 0)
+		cmdVote(ent);
+	else if (Q_stricmp(cmd, "ready") == 0)
+		cmdReady(ent);
+/*freeze*/
 	else	// anything that doesn't match a command will be a chat
 		Cmd_Say_f (ent, false, true);
 }

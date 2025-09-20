@@ -234,7 +234,11 @@ void SV_CalcViewOffset (edict_t *ent)
 	angles = ent->client->ps.kick_angles;
 
 	// if dead, fix the angle and don't add any kick
+/*freeze
 	if (ent->deadflag)
+freeze*/
+	if (ent->deadflag && !ent->client->frozen)
+/*freeze*/
 	{
 		VectorClear (angles);
 
@@ -472,6 +476,19 @@ void SV_CalcBlend (edict_t *ent)
 		if (remaining > 30 || (remaining & 4) )
 			SV_AddBlend (0.4, 1, 0.4, 0.04, ent->client->ps.blend);
 	}
+/*freeze*/
+	else if (ent->client->frozen && !ent->client->chase_target && (!ent->client->resp.thawer || level.framenum &8))
+	{
+		if (ent->client->resp.team == red)
+			SV_AddBlend(0.6, 0, 0, 0.4, ent->client->ps.blend);
+		else if (ent->client->resp.team == green)
+			SV_AddBlend(0, 0.6, 0, 0.4, ent->client->ps.blend);
+		else if (ent->client->resp.team == yellow)
+			SV_AddBlend(0.6, 0.6, 0, 0.4, ent->client->ps.blend);
+		else
+			SV_AddBlend(0.6, 0.6, 0.6, 0.4, ent->client->ps.blend);
+	}
+/*freeze*/
 
 	// add for damage
 	if (ent->client->damage_alpha > 0)
@@ -525,6 +542,10 @@ void P_FallingDamage (edict_t *ent)
 	// never take falling damage if completely underwater
 	if (ent->waterlevel == 3)
 		return;
+/*freeze*/
+	if (!(ent->client->ps.pmove.pm_flags &PMF_ON_GROUND || ent->client->buttons &4))
+		return;
+/*freeze*/
 	if (ent->waterlevel == 2)
 		delta *= 0.25;
 	if (ent->waterlevel == 1)
@@ -750,6 +771,9 @@ void G_SetClientEffects (edict_t *ent)
 	ent->s.effects = 0;
 	ent->s.renderfx = 0;
 
+/*freeze*/
+	freezeEffects(ent);
+/*freeze*/
 	if (ent->health <= 0 || level.intermissiontime)
 		return;
 
@@ -771,6 +795,11 @@ void G_SetClientEffects (edict_t *ent)
 	{
 		remaining = ent->client->quad_framenum - level.framenum;
 		if (remaining > 30 || (remaining & 4) )
+/*freeze*/
+		if (level.framenum &8)
+			playerShell(ent, ent->client->resp.team);
+		else
+/*freeze*/
 			ent->s.effects |= EF_QUAD;
 	}
 
@@ -778,6 +807,9 @@ void G_SetClientEffects (edict_t *ent)
 	{
 		remaining = ent->client->invincible_framenum - level.framenum;
 		if (remaining > 30 || (remaining & 4) )
+/*freeze*/
+		if (level.framenum &8)
+/*freeze*/
 			ent->s.effects |= EF_PENT;
 	}
 
@@ -971,6 +1003,11 @@ void ClientEndServerFrame (edict_t *ent)
 	// If it wasn't updated here, the view position would lag a frame
 	// behind the body position when pushed -- "sinking into plats"
 	//
+/*freeze*/
+	if (current_client->frozen && current_client->chase_target)
+		UpdateChaseCam(ent);
+	else
+/*freeze*/
 	for (i=0 ; i<3 ; i++)
 	{
 		current_client->ps.pmove.origin[i] = ent->s.origin[i]*8.0;
@@ -1056,6 +1093,11 @@ void ClientEndServerFrame (edict_t *ent)
 	SV_CalcBlend (ent);
 
 	// chase cam stuff
+/*freeze*/
+	if (ent->client->frozen)
+		G_SetSpectatorStats(ent);
+	else
+/*freeze*/
 	if (ent->client->resp.spectator)
 		G_SetSpectatorStats(ent);
 	else
@@ -1080,6 +1122,11 @@ void ClientEndServerFrame (edict_t *ent)
 	// if the scoreboard is up, update it
 	if (ent->client->showscores && !(level.framenum & 31) )
 	{
+/*freeze*/
+		if (ent->client->menu)
+			pmenu_update(ent);
+		else
+/*freeze*/
 		DeathmatchScoreboardMessage (ent, ent->enemy);
 		gi.unicast (ent, false);
 	}

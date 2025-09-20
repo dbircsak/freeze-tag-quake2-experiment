@@ -389,6 +389,7 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 	// friendly fire avoidance
 	// if enabled you can't hurt teammates (but you can hurt yourself)
 	// knockback still occurs
+/*freeze
 	if ((targ != attacker) && ((deathmatch->value && ((int)(dmflags->value) & (DF_MODELTEAMS | DF_SKINTEAMS))) || coop->value))
 	{
 		if (OnSameTeam (targ, attacker))
@@ -399,6 +400,7 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 				mod |= MOD_FRIENDLY_FIRE;
 		}
 	}
+freeze*/
 	meansOfDeath = mod;
 
 	// easy mode takes half damage
@@ -422,6 +424,11 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 	if (!(dflags & DAMAGE_RADIUS) && (targ->svflags & SVF_MONSTER) && (attacker->client) && (!targ->enemy) && (targ->health > 0))
 		damage *= 2;
 
+/*freeze*/
+	if (client && client->frozen)
+		knockback *= 2;
+	else
+/*freeze*/
 	if (targ->flags & FL_NO_KNOCKBACK)
 		knockback = 0;
 
@@ -450,6 +457,15 @@ void T_Damage (edict_t *targ, edict_t *inflictor, edict_t *attacker, vec3_t dir,
 	take = damage;
 	save = 0;
 
+/*freeze*/
+	if (playerDamage(targ, attacker, damage) && !(dflags &DAMAGE_NO_PROTECTION))
+	{
+		take = 0;
+		save = damage;
+		SpawnDamage(te_sparks, point, normal, save);
+		return;
+	}
+/*freeze*/
 	// check for godmode
 	if ( (targ->flags & FL_GODMODE) && !(dflags & DAMAGE_NO_PROTECTION) )
 	{
