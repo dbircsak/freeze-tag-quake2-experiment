@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 #include "g_local.h"
 #include "m_player.h"
+#include "ui_system.h"
 
 void ClientUserinfoChanged (edict_t *ent, char *userinfo);
 
@@ -1242,6 +1243,9 @@ void PutClientInServer (edict_t *ent)
 		ent->svflags |= SVF_NOCLIENT;
 		ent->client->ps.gunindex = 0;
 		gi.linkentity (ent);
+		
+		// show menu to spectators
+		UI_ShowMenu(ent, "Team Selection");
 		return;
 	} else
 		client->resp.spectator = false;
@@ -1586,6 +1590,9 @@ void ClientThink (edict_t *ent, usercmd_t *ucmd)
 
 	level.current_entity = ent;
 	client = ent->client;
+	
+	// update UI system
+	UI_Update(ent);
 
 	if (level.intermissiontime)
 	{

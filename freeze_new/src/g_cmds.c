@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 #include "g_local.h"
 #include "m_player.h"
+#include "ui_system.h"
 
 
 char *ClientTeam (edict_t *ent)
@@ -956,11 +957,29 @@ void ClientCommand (edict_t *ent)
 	else if (Q_stricmp (cmd, "noclip") == 0)
 		Cmd_Noclip_f (ent);
 	else if (Q_stricmp (cmd, "inven") == 0)
-		Cmd_Inven_f (ent);
+	{
+		// Check if UI is active and handle input
+		if (UI_IsActive(ent))
+			UI_HandleInput(ent, 'u');
+		else
+			Cmd_Inven_f (ent);
+	}
 	else if (Q_stricmp (cmd, "invnext") == 0)
-		SelectNextItem (ent, -1);
+	{
+		// Check if UI is active and handle input
+		if (UI_IsActive(ent))
+			UI_HandleInput(ent, 'n');
+		else
+			SelectNextItem (ent, -1);
+	}
 	else if (Q_stricmp (cmd, "invprev") == 0)
-		SelectPrevItem (ent, -1);
+	{
+		// Check if UI is active and handle input
+		if (UI_IsActive(ent))
+			UI_HandleInput(ent, 'p');
+		else
+			SelectPrevItem (ent, -1);
+	}
 	else if (Q_stricmp (cmd, "invnextw") == 0)
 		SelectNextItem (ent, IT_WEAPON);
 	else if (Q_stricmp (cmd, "invprevw") == 0)
@@ -983,6 +1002,8 @@ void ClientCommand (edict_t *ent)
 		Cmd_Kill_f (ent);
 	else if (Q_stricmp (cmd, "putaway") == 0)
 		Cmd_PutAway_f (ent);
+	else if (Q_stricmp (cmd, "menu") == 0)
+		UI_ShowMenu(ent, "Main Menu");
 	else if (Q_stricmp (cmd, "wave") == 0)
 		Cmd_Wave_f (ent);
 	else if (Q_stricmp(cmd, "playerlist") == 0)

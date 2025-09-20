@@ -106,6 +106,7 @@
     <ClInclude Include="m_supertank.h" />
     <ClInclude Include="m_tank.h" />
     <ClInclude Include="q_shared.h" />
+    <ClInclude Include="ui_system.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="g_ai.c" />
@@ -156,6 +157,7 @@
     <ClCompile Include="p_view.c" />
     <ClCompile Include="p_weapon.c" />
     <ClCompile Include="q_shared.c" />
+    <ClCompile Include="ui_system.c" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -10,9 +10,18 @@ Quake 2 freeze tag game mode experiment - comprehensive modification of original
 - `freeze_new/` - Working directory for new modifications and improvements
 
 ## Key Modifications Made
-- **New files**: `freeze.h`, `freeze.c` (~1000 lines of freeze tag logic)
-- **Modified core files**: `g_local.h`, `g_cmds.c`, `g_combat.c`, `p_client.c`, `p_hud.c`, `g_main.c`
-- **Features added**: 4-team system, freeze/thaw mechanics, grappling hooks, map voting, ready system
+- **New files**: `freeze.h` (39 lines), `freeze.c` (2470 lines of freeze tag logic)
+- **New config files**: `freeze.cfg`, `freeze.bat`, `freeze.ini`, `pak2.pak`
+- **Modified core files**: `g_local.h`, `p_client.c`, `g_main.c`, `g_spawn.c`, `p_hud.c`, `p_view.c`, `p_weapon.c`, `g_save.c`, `g_cmds.c`, `g_chase.c`, `g_items.c`, `g_combat.c`, `q_shared.h`
+- **Features added**: 4-team system, freeze/thaw mechanics, grappling hooks, map voting, ready system, flood protection, team switching menus
+
+## freeze_new Enhancements
+- **New UI System**: `ui_system.h`, `ui_system.c` - Modern MOTD and menu system
+- **MOTD Support**: Configurable welcome messages loaded from `motd.txt`
+- **Interactive Menus**: Navigate with inventory keys (prev/next/use)
+- **Input Integration**: Intercepts inventory commands when UI is active
+- **Memory Management**: Proper cleanup and timeout support
+- **Command Added**: `menu` command to open main menu
 
 ## Common Commands
 - Build: Open `freeze_orig/src/game.sln` in Visual Studio and build solution
@@ -33,6 +42,8 @@ Quake 2 freeze tag game mode experiment - comprehensive modification of original
 - Extensive configuration system with CVars and map-specific settings
 - Windows build environment with Visual Studio integration
 - Compiled DLL suggests this was a working implementation
+- **IMPORTANT**: This is a Windows environment - use Windows commands only (dir, findstr, powershell) not Linux commands (ls, grep, head, tail, etc.)
+- **WORK RESTRICTION**: Only modify AGENTS.md and files within freeze_new/ directory - do NOT modify q2_orig/ or freeze_orig/ files
 
 ## Team System
 - 4 teams: Red, Blue, Green, Yellow

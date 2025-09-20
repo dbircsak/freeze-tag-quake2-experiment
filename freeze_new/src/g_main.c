@@ -19,6 +19,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 
 #include "g_local.h"
+#include "ui_system.h"
 
 game_locals_t	game;
 level_locals_t	level;
@@ -94,6 +95,9 @@ void G_RunFrame (void);
 void ShutdownGame (void)
 {
 	gi.dprintf ("==== ShutdownGame ====\n");
+	
+	// shutdown UI system
+	UI_Shutdown();
 
 	gi.FreeTags (TAG_LEVEL);
 	gi.FreeTags (TAG_GAME);

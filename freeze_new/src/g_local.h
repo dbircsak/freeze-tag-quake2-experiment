@@ -17,6 +17,10 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
+
+#ifndef G_LOCAL_H
+#define G_LOCAL_H
+
 // g_local.h -- local definitions for game module
 
 #include "q_shared.h"
@@ -1111,4 +1115,6 @@ struct edict_s
 	moveinfo_t		moveinfo;
 	monsterinfo_t	monsterinfo;
 };
+
+#endif // G_LOCAL_H
 
