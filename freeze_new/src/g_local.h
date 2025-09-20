@@ -961,6 +961,10 @@ struct gclient_s
 
 	edict_t		*chase_target;		// player we are chasing
 	qboolean	update_chase;		// need to update chase info?
+	
+	// Grappling hook fields
+	edict_t		*hook;				// current hook entity
+	int			hookstate;			// hook state flags (on/off, grow/shrink)
 };
 
 

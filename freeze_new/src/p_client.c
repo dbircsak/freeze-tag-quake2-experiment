@@ -502,6 +502,9 @@ void player_die (edict_t *self, edict_t *inflictor, edict_t *attacker, int damag
 {
 	int		n;
 
+	// Clean up grappling hook
+	FT_CleanupHook(self);
+
 	VectorClear (self->avelocity);
 
 	self->takedamage = DAMAGE_YES;
@@ -1520,6 +1523,9 @@ void ClientDisconnect (edict_t *ent)
 
 	if (!ent->client)
 		return;
+		
+	// Clean up grappling hook
+	FT_CleanupHook(ent);
 
 	gi.bprintf (PRINT_HIGH, "%s disconnected\n", ent->client->pers.netname);
 

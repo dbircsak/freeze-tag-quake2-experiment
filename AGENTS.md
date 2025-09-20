@@ -21,6 +21,15 @@ Quake 2 freeze tag game mode experiment - comprehensive modification of original
   - Default config: start_weapon 35 (shotgun + super shotgun + rocket launcher)
   - Includes start_armor support via `start_armor` cvar
 
+- **Grappling hook system**: Built-in movement ability for all players
+  - Hook projectile with physics simulation and collision detection
+  - Dynamic pull force based on chain length (force = distance * 5.0 multiplier)
+  - Grow/shrink modes for variable chain length control
+  - Visual chain rendering using temp entities
+  - Bound to MOUSE2 (+hook/-hook) with console commands for advanced control
+  - Configurable via CVars: hook_max_length, hook_min_length, hook_speed, hook_pull_speed, hook_wall_only
+  - Automatic cleanup on player death/disconnect
+
 ## Common Commands
 - Build: Open `freeze_orig/src/game.sln` or `freeze_new/src/game.sln` in Visual Studio and build solution
 - Clean: Use Visual Studio "Clean Solution" or delete build artifacts
