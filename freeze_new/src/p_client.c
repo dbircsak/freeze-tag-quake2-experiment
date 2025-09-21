@@ -638,6 +638,8 @@ void InitClientResp (gclient_t *client)
 	memset (&client->resp, 0, sizeof(client->resp));
 	client->resp.enterframe = level.framenum;
 	client->resp.coop_respawn = client->pers;
+	client->resp.team = TEAM_NONE;  // Initialize to no team
+	client->resp.frozen = false;    // Initialize as not frozen
 }
 
 /*
@@ -1277,6 +1279,10 @@ void ClientBeginDeathmatch (edict_t *ent)
 
 	InitClientResp (ent->client);
 
+	// Auto-assign team for freeze tag
+	team_t team = FT_AutoAssignTeam();
+	FT_JoinTeam(ent, team);
+
 	// locate ent at a spawn point
 	PutClientInServer (ent);
 
@@ -1293,7 +1299,12 @@ void ClientBeginDeathmatch (edict_t *ent)
 		gi.multicast (ent->s.origin, MULTICAST_PVS);
 	}
 
-	gi.bprintf (PRINT_HIGH, "%s entered the game\n", ent->client->pers.netname);
+	// Announce player joining with team assignment
+	if (team >= 0 && team < MAX_TEAMS)
+		gi.bprintf (PRINT_HIGH, "%s entered the game and joined the %s team\n", 
+			ent->client->pers.netname, teams[team].name);
+	else
+		gi.bprintf (PRINT_HIGH, "%s entered the game\n", ent->client->pers.netname);
 
 	// make sure all view stuff is valid
 	ClientEndServerFrame (ent);

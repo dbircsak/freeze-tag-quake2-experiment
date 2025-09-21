@@ -30,6 +30,15 @@ Quake 2 freeze tag game mode experiment - comprehensive modification of original
   - Configurable via CVars: hook_max_length, hook_min_length, hook_speed, hook_pull_speed, hook_wall_only
   - Automatic cleanup on player death/disconnect
 
+- **4-team auto-assignment system**: Balanced team assignment for freeze tag gameplay
+  - Teams: Red, Blue, Green, Yellow with CTF skin support (ctf_r, ctf_b, ctf_g, ctf_y)
+  - Automatic assignment to team with fewest players on connection
+  - Manual team switching via `team` command (red, blue, green, yellow, auto)
+  - Team damage prevention - teammates cannot hurt each other
+  - Chat system integration: shows team names in messages and team-only chat support
+  - Public announcements for team joins and switches
+  - Team tracking via client respawn structure with frozen status support
+
 ## Common Commands
 - Build: Open `freeze_orig/src/game.sln` or `freeze_new/src/game.sln` in Visual Studio and build solution
 - Clean: Use Visual Studio "Clean Solution" or delete build artifacts
@@ -50,11 +59,19 @@ Quake 2 freeze tag game mode experiment - comprehensive modification of original
 - Windows build environment with Visual Studio integration
 - Compiled DLL suggests this was a working implementation
 
-## Team System
-- 4 teams: Red, Blue, Green, Yellow
-- Team damage prevention
-- Team-based scoring and win conditions
-- Player can switch teams via menu system
+## Important: Windows Environment
+- **CRITICAL**: This is a Windows system - use Windows commands ONLY
+- Use PowerShell or CMD commands, not Linux/Unix commands
+
+## Team System (freeze_new)
+- 4 teams: Red, Blue, Green, Yellow with auto-assignment
+- Automatic balancing - players join team with fewest members
+- Manual team switching via `team` command with options: red, blue, green, yellow, auto
+- Team damage prevention - teammates cannot hurt each other
+- CTF skins for visual identification (ctf_r, ctf_b, ctf_g, ctf_y)
+- Chat integration: [TeamName] PlayerName for regular chat, (PlayerName)[TeamName] for team chat
+- Team-only communication via say_team command
+- Public announcements for all team joins and switches
 
 ## Freeze Tag Mechanics
 - Players freeze instead of dying

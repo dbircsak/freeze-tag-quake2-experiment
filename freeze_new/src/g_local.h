@@ -875,6 +875,8 @@ typedef struct
 	vec3_t		cmd_angles;			// angles sent over in the last command
 
 	qboolean	spectator;			// client is a spectator
+	int			team;				// player's team (TEAM_RED, TEAM_BLUE, etc)
+	qboolean	frozen;				// is player frozen?
 } client_respawn_t;
 
 // this structure is cleared on each PutClientInServer(),

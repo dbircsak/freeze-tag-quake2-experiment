@@ -781,6 +781,65 @@ void Cmd_Wave_f (edict_t *ent)
 
 /*
 ==================
+Cmd_Team_f
+==================
+*/
+void Cmd_Team_f (edict_t *ent)
+{
+	char *team_name;
+	team_t new_team = TEAM_NONE;
+	team_t current_team;
+	
+	if (gi.argc() < 2)
+	{
+		// Show current team and available teams
+		current_team = FT_GetPlayerTeam(ent);
+		if (current_team >= 0 && current_team < MAX_TEAMS)
+			gi.cprintf(ent, PRINT_HIGH, "You are on the %s team.\n", teams[current_team].name);
+		else
+			gi.cprintf(ent, PRINT_HIGH, "You are not on a team.\n");
+			
+		gi.cprintf(ent, PRINT_HIGH, "Available teams: red, blue, green, yellow, auto\n");
+		return;
+	}
+	
+	team_name = gi.argv(1);
+	
+	// Parse team selection
+	if (Q_stricmp(team_name, "red") == 0)
+		new_team = TEAM_RED;
+	else if (Q_stricmp(team_name, "blue") == 0)
+		new_team = TEAM_BLUE;
+	else if (Q_stricmp(team_name, "green") == 0)
+		new_team = TEAM_GREEN;
+	else if (Q_stricmp(team_name, "yellow") == 0)
+		new_team = TEAM_YELLOW;
+	else if (Q_stricmp(team_name, "auto") == 0)
+		new_team = FT_AutoAssignTeam();
+	else
+	{
+		gi.cprintf(ent, PRINT_HIGH, "Invalid team. Use: red, blue, green, yellow, or auto\n");
+		return;
+	}
+	
+	// Check if already on requested team
+	current_team = FT_GetPlayerTeam(ent);
+	if (current_team == new_team)
+	{
+		gi.cprintf(ent, PRINT_HIGH, "You are already on the %s team.\n", teams[new_team].name);
+		return;
+	}
+	
+	// Join the new team
+	FT_JoinTeam(ent, new_team);
+	
+	// Announce team change to everyone
+	gi.bprintf(PRINT_HIGH, "%s switched to the %s team\n", 
+		ent->client->pers.netname, teams[new_team].name);
+}
+
+/*
+==================
 Cmd_Say_f
 ==================
 */
@@ -791,17 +850,21 @@ void Cmd_Say_f (edict_t *ent, qboolean team, qboolean arg0)
 	char	*p;
 	char	text[2048];
 	gclient_t *cl;
+	team_t player_team;
 
 	if (gi.argc () < 2 && !arg0)
 		return;
 
-	if (!((int)(dmflags->value) & (DF_MODELTEAMS | DF_SKINTEAMS)))
-		team = false;
+	// Get player's team for message formatting
+	player_team = FT_GetPlayerTeam(ent);
 
 	if (team)
-		Com_sprintf (text, sizeof(text), "(%s): ", ent->client->pers.netname);
+		Com_sprintf (text, sizeof(text), "(%s)[%s]: ", ent->client->pers.netname, 
+			(player_team >= 0 && player_team < MAX_TEAMS) ? teams[player_team].name : "None");
 	else
-		Com_sprintf (text, sizeof(text), "%s: ", ent->client->pers.netname);
+		Com_sprintf (text, sizeof(text), "[%s] %s: ", 
+			(player_team >= 0 && player_team < MAX_TEAMS) ? teams[player_team].name : "None",
+			ent->client->pers.netname);
 
 	if (arg0)
 	{
@@ -862,7 +925,7 @@ void Cmd_Say_f (edict_t *ent, qboolean team, qboolean arg0)
 			continue;
 		if (team)
 		{
-			if (!OnSameTeam(ent, other))
+			if (!FT_OnSameTeam(ent, other))
 				continue;
 		}
 		gi.cprintf(other, PRINT_CHAT, "%s", text);
@@ -937,6 +1000,11 @@ void ClientCommand (edict_t *ent)
 	if (Q_stricmp (cmd, "help") == 0)
 	{
 		Cmd_Help_f (ent);
+		return;
+	}
+	if (Q_stricmp (cmd, "team") == 0)
+	{
+		Cmd_Team_f (ent);
 		return;
 	}
 

@@ -31,11 +31,19 @@ Working with **AmpCode**, we've begun adding modern enhancements to `freeze_new/
 - Visual chain rendering
 - Configurable parameters via CVars
 
+### 👥 4-Team Auto-Assignment System ✅
+- Automatic team balancing (Red, Blue, Green, Yellow)
+- Players auto-assigned to team with fewest members on join
+- Complete team damage prevention
+- CTF skins for visual team identification
+- Enhanced chat system with team indicators
+- Team-only communication support
+- Manual team switching via `team` command
+- Public announcements for team joins/switches
+
 ### 🎮 Still To Be Implemented
 - Port core freeze tag mechanics from `freeze_orig/`
-- 4-team system (Red, Blue, Green, Yellow)
 - Freeze/thaw player mechanics
-- Team damage prevention
 - Ready system and map voting
 
 ## The AI Development Process
@@ -49,9 +57,9 @@ This project showcases what's possible when human creativity meets AI capability
 
 ## AmpCode Stats
 
-- **2 new systems** implemented so far (start weapons & grappling hook)
-- **Several core files** modified with AI assistance
-- **~500+ lines** of new code generated for hooks and weapon systems
+- **3 new systems** implemented so far (start weapons, grappling hook & 4-team system)
+- **6+ core files** modified with AI assistance (freeze.h, freeze.c, g_local.h, p_client.c, g_combat.c, g_cmds.c)
+- **~800+ lines** of new code generated for weapons, hooks and team systems
 - **Full backward compatibility** maintained with original Q2 architecture
 
 ## Build Instructions

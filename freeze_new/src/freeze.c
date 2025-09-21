@@ -19,6 +19,187 @@ cvar_t* hook_speed;
 cvar_t* hook_pull_speed;
 cvar_t* hook_wall_only;
 
+// Global team information array
+team_info_t teams[MAX_TEAMS];
+
+//
+// FT_InitTeams
+// Initialize the team system with default values
+//
+void FT_InitTeams(void)
+{
+	teams[TEAM_RED].name = "Red";
+	teams[TEAM_RED].skin = "ctf_r";
+	teams[TEAM_RED].score = 0;
+	teams[TEAM_RED].players = 0;
+	teams[TEAM_RED].frozen_count = 0;
+	teams[TEAM_RED].eliminated = false;
+
+	teams[TEAM_BLUE].name = "Blue";
+	teams[TEAM_BLUE].skin = "ctf_b";
+	teams[TEAM_BLUE].score = 0;
+	teams[TEAM_BLUE].players = 0;
+	teams[TEAM_BLUE].frozen_count = 0;
+	teams[TEAM_BLUE].eliminated = false;
+
+	teams[TEAM_GREEN].name = "Green";
+	teams[TEAM_GREEN].skin = "ctf_g";
+	teams[TEAM_GREEN].score = 0;
+	teams[TEAM_GREEN].players = 0;
+	teams[TEAM_GREEN].frozen_count = 0;
+	teams[TEAM_GREEN].eliminated = false;
+
+	teams[TEAM_YELLOW].name = "Yellow";
+	teams[TEAM_YELLOW].skin = "ctf_y";
+	teams[TEAM_YELLOW].score = 0;
+	teams[TEAM_YELLOW].players = 0;
+	teams[TEAM_YELLOW].frozen_count = 0;
+	teams[TEAM_YELLOW].eliminated = false;
+}
+
+//
+// FT_UpdateTeamCounts
+// Update player counts for all teams
+//
+void FT_UpdateTeamCounts(void)
+{
+	int i, j;
+	
+	// Reset all team counts
+	for (i = 0; i < MAX_TEAMS; i++)
+	{
+		teams[i].players = 0;
+		teams[i].frozen_count = 0;
+	}
+	
+	// Count players on each team
+	for (j = 1; j <= maxclients->value; j++)
+	{
+		edict_t* ent = g_edicts + j;
+		if (!ent->inuse || !ent->client)
+			continue;
+		
+		team_t team = FT_GetPlayerTeam(ent);
+		if (team >= 0 && team < MAX_TEAMS)
+		{
+			teams[team].players++;
+			if (ent->client->resp.frozen)
+				teams[team].frozen_count++;
+		}
+	}
+}
+
+//
+// FT_AutoAssignTeam
+// Find the team with the fewest players for balanced assignment
+//
+team_t FT_AutoAssignTeam(void)
+{
+	int min_players = 999;
+	team_t best_team = TEAM_RED;
+	int i;
+	
+	FT_UpdateTeamCounts();
+	
+	// Find team with fewest players
+	for (i = 0; i < MAX_TEAMS; i++)
+	{
+		if (teams[i].players < min_players)
+		{
+			min_players = teams[i].players;
+			best_team = (team_t)i;
+		}
+	}
+	
+	return best_team;
+}
+
+//
+// FT_JoinTeam
+// Assign a player to a specific team
+//
+void FT_JoinTeam(edict_t* ent, team_t team)
+{
+	if (!ent || !ent->client || team < 0 || team >= MAX_TEAMS)
+		return;
+	
+	ent->client->resp.team = team;
+	ent->client->resp.frozen = false;
+	
+	// Set team skin in userinfo string
+	char userinfo[MAX_INFO_STRING];
+	char* info_skin;
+	char new_skin[64];
+	
+	strcpy(userinfo, ent->client->pers.userinfo);
+	info_skin = Info_ValueForKey(userinfo, "skin");
+	
+	// Extract model prefix (e.g., "male/" from "male/grunt")
+	char* slash_pos = strchr(info_skin, '/');
+	if (slash_pos && (slash_pos - info_skin) < 32)
+	{
+		// Use model prefix + team skin
+		int prefix_len = slash_pos - info_skin + 1;
+		strncpy(new_skin, info_skin, prefix_len);
+		new_skin[prefix_len] = '\0';
+		strcat(new_skin, teams[team].skin + 4); // Remove "ctf_" prefix
+	}
+	else
+	{
+		// Fallback to default team skin
+		strcpy(new_skin, teams[team].skin);
+	}
+	
+	Info_SetValueForKey(userinfo, "skin", new_skin);
+	strcpy(ent->client->pers.userinfo, userinfo);
+	ClientUserinfoChanged(ent, userinfo);
+	
+	// Update team counts
+	FT_UpdateTeamCounts();
+	
+	// Notify player
+	gi.cprintf(ent, PRINT_HIGH, "You joined the %s team.\n", teams[team].name);
+}
+
+//
+// FT_GetPlayerTeam
+// Get the team of a player
+//
+team_t FT_GetPlayerTeam(edict_t* ent)
+{
+	if (!ent || !ent->client)
+		return TEAM_NONE;
+	
+	return (team_t)ent->client->resp.team;
+}
+
+//
+// FT_OnSameTeam
+// Check if two players are on the same team
+//
+qboolean FT_OnSameTeam(edict_t* ent1, edict_t* ent2)
+{
+	if (!ent1 || !ent2 || !ent1->client || !ent2->client)
+		return false;
+	
+	team_t team1 = FT_GetPlayerTeam(ent1);
+	team_t team2 = FT_GetPlayerTeam(ent2);
+	
+	return (team1 != TEAM_NONE && team1 == team2);
+}
+
+//
+// FT_GetTeamSkin
+// Get the skin name for a team
+//
+char* FT_GetTeamSkin(team_t team)
+{
+	if (team >= 0 && team < MAX_TEAMS)
+		return teams[team].skin;
+	
+	return "male/grunt";  // Default skin
+}
+
 //
 // FT_GiveWeapon
 // Helper function to give a weapon and its ammo to a player

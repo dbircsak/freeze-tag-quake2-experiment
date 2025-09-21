@@ -223,6 +223,9 @@ void InitGame (void)
 	
 	// Initialize freeze tag cvars
 	FT_InitGame();
+	
+	// Initialize team system
+	FT_InitTeams();
 }
 
 //=========================================================

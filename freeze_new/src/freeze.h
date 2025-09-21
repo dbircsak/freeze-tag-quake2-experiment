@@ -5,6 +5,29 @@
 #ifndef FREEZE_H
 #define FREEZE_H
 
+// Team definitions for 4-team freeze tag
+typedef enum {
+    TEAM_NONE = -1,    // Spectator/no team
+    TEAM_RED = 0,
+    TEAM_BLUE = 1,
+    TEAM_GREEN = 2,
+    TEAM_YELLOW = 3,
+    MAX_TEAMS = 4
+} team_t;
+
+// Team info structure
+typedef struct {
+    char* name;
+    char* skin;
+    int score;
+    int players;
+    int frozen_count;
+    qboolean eliminated;
+} team_info_t;
+
+// Global team info array
+extern team_info_t teams[MAX_TEAMS];
+
 // Weapon bit flags for start_weapon cvar
 #define	_shotgun		0x00000001	// 1
 #define	_supershotgun	0x00000002	// 2
@@ -31,6 +54,18 @@ void FT_DropHook(edict_t* ent);
 void FT_UpdateHookChain(edict_t* ent);
 void FT_CleanupHook(edict_t* ent);
 static void FT_GiveWeapon(const char* weapon_name, edict_t* ent);
+
+// Initialization function declarations
+void FT_InitGame(void);
+
+// Team function declarations
+void FT_InitTeams(void);
+team_t FT_AutoAssignTeam(void);
+void FT_JoinTeam(edict_t* ent, team_t team);
+qboolean FT_OnSameTeam(edict_t* ent1, edict_t* ent2);
+team_t FT_GetPlayerTeam(edict_t* ent);
+void FT_UpdateTeamCounts(void);
+char* FT_GetTeamSkin(team_t team);
 
 // External cvars
 extern cvar_t* start_weapon;
