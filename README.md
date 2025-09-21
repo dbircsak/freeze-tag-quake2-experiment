@@ -1,6 +1,6 @@
 # Quake 2 Freeze Tag - AI-Assisted Development Experiment
 
-This repository documents an experiment in AI-assisted game development, where **AmpCode** - Sourcegraph's AI coding agent - was used to modernize and enhance a classic Quake 2 Freeze Tag mod.
+This repository documents an experiment in AI-assisted game development, where **AmpCode** - Sourcegraph's AI coding agent - was used to modernize and enhance a classic Quake 2 Freeze Tag mod. This blog post captures the initial efforts: [Getting Friendly with AI: More Amp](https://darrellbircsak.com/2025/09/20/getting-friendly-with-ai-more-amp/).
 
 ## Project Overview
 
