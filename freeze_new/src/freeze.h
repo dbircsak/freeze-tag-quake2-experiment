@@ -53,6 +53,7 @@ void FT_FireHook(edict_t* ent);
 void FT_DropHook(edict_t* ent);
 void FT_UpdateHookChain(edict_t* ent);
 void FT_CleanupHook(edict_t* ent);
+void FT_Scoreboard(edict_t* ent, edict_t* killer);
 static void FT_GiveWeapon(const char* weapon_name, edict_t* ent);
 
 // Initialization function declarations

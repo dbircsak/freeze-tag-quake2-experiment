@@ -18,6 +18,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 */
 #include "g_local.h"
+#include "freeze.h"
 
 
 
@@ -163,6 +164,11 @@ DeathmatchScoreboardMessage
 */
 void DeathmatchScoreboardMessage (edict_t *ent, edict_t *killer)
 {
+	// Use the new freeze tag scoreboard
+	FT_Scoreboard(ent, killer);
+	return;
+	
+	// Original code below (preserved but not executed)
 	char	entry[1024];
 	char	string[1400];
 	int		stringlength;

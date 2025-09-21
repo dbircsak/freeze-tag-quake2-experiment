@@ -560,3 +560,144 @@ void FT_CleanupHook(edict_t* ent)
 		}
 	}
 }
+
+//
+// FT_Scoreboard
+// Display 4-team freeze tag scoreboard with team stats and player status
+//
+void FT_Scoreboard(edict_t *ent, edict_t *killer)
+{
+	char entry[1024];
+	char string[1400];
+	int stringlength;
+	int i, j, k;
+	int sorted[MAX_TEAMS][MAX_CLIENTS];
+	int sortedscores[MAX_TEAMS][MAX_CLIENTS];
+	int team_totals[MAX_TEAMS];
+	int score;
+	gclient_t *cl;
+	edict_t *cl_ent;
+	char *team_icons[MAX_TEAMS] = {"k_redkey", "k_bluekey", "k_security", "k_powercube"};
+	char *team_colors[MAX_TEAMS] = {"Red", "Blue", "Green", "Yellow"};
+	int x, y;
+	int column_width = 160;
+	int header_height = 24;
+	int line_height = 8;
+	int max_players_per_column = 20;
+	
+	// Initialize team totals
+	for (i = 0; i < MAX_TEAMS; i++)
+		team_totals[i] = 0;
+	
+	// Sort players by score within each team
+	for (i = 0; i < game.maxclients; i++)
+	{
+		cl_ent = g_edicts + 1 + i;
+		if (!cl_ent->inuse || game.clients[i].resp.spectator)
+			continue;
+			
+		int team = game.clients[i].resp.team;
+		if (team < 0 || team >= MAX_TEAMS)
+			continue;
+			
+		score = game.clients[i].resp.score;
+		
+		// Insert player into sorted list for their team
+		for (j = 0; j < team_totals[team]; j++)
+		{
+			if (score > sortedscores[team][j])
+				break;
+		}
+		
+		// Shift existing entries down
+		for (k = team_totals[team]; k > j; k--)
+		{
+			sorted[team][k] = sorted[team][k-1];
+			sortedscores[team][k] = sortedscores[team][k-1];
+		}
+		
+		sorted[team][j] = i;
+		sortedscores[team][j] = score;
+		team_totals[team]++;
+	}
+	
+	// Start building layout string
+	string[0] = 0;
+	stringlength = 0;
+	
+	x = 0;
+	y = 32;
+	
+	// Display each team (matching original freezeScore format)
+	for (i = 0; i < MAX_TEAMS; i++)
+	{
+		if (team_totals[i] == 0)
+			continue;
+		
+		// Team header with icon and concise stats (like original)
+		Com_sprintf(entry, sizeof(entry),
+			"xv %d yv %d if %d picn %s endif string \"%6.6s Sco%3d Fro%3d\" ",
+			x, y, 19 + i, team_icons[i], team_colors[i], teams[i].score, teams[i].frozen_count);
+			
+		k = strlen(entry);
+		if (stringlength + k > 1024)
+			break;
+		strcpy(string + stringlength, entry);
+		stringlength += k;
+		y += 16;
+		
+		// Display players for this team
+		for (j = 0; j < team_totals[i]; j++)
+		{
+			if (y >= 224)
+			{
+				if (x == 0)
+					x = 160;
+				else
+					break;
+				y = 32;
+			}
+			
+			cl = &game.clients[sorted[i][j]];
+			
+			// Player entry (exactly like original)
+			Com_sprintf(entry, sizeof(entry), "ctf %d %d %d %d %d ",
+				x, y, sorted[i][j], cl->resp.score, (cl->ping > 999 ? 999 : cl->ping));
+				
+			// Add frozen indicator (like original)
+			if (cl->resp.frozen)
+				sprintf(entry + strlen(entry), "xv %d yv %d string2 \"/\" ", x + 56, y);
+			
+			k = strlen(entry);
+			if (stringlength + k > 1024)
+				break;
+			strcpy(string + stringlength, entry);
+			stringlength += k;
+			
+			y += 8;
+		}
+		
+		// Team separator (like original)
+		Com_sprintf(entry, sizeof(entry), "xv %d yv %d string \"--------------------\" ", x, y);
+		k = strlen(entry);
+		if (stringlength + k > 1024)
+			break;
+		strcpy(string + stringlength, entry);
+		stringlength += k;
+		
+		if (y >= 208 || (y >= 100 && x == 0))
+		{
+			if (x == 0)
+				x = 160;
+			else
+				break;
+			y = 32;
+		}
+		else
+			y += 8;
+	}
+	
+	// Send the layout
+	gi.WriteByte(svc_layout);
+	gi.WriteString(string);
+}
